@@ -1,2 +1,2 @@
-# meme-it
+# meme-that
 Repository for online meme game
