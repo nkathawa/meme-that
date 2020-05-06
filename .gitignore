@@ -2,3 +2,4 @@
 .idea/
 util/__pycache__/
 .vscode/
+util/caption_scraper/caption_scraper/spiders/__pycache__/

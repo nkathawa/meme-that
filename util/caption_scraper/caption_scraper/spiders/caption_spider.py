@@ -2,6 +2,7 @@ import scrapy
 from lxml import html
 import json
 import os
+import urllib.parse
 
 class CaptionSpider(scrapy.Spider):
     name = "Caption"
@@ -16,15 +17,18 @@ class CaptionSpider(scrapy.Spider):
         if not response:
                 self.log("Failed to fetch page")
                 return None
+        url_parts = urllib.parse.urlparse(str(response.url))
+        path_parts = url_parts[2].rpartition('/')
+        title = path_parts[2].replace('-', ' ')
+        #title = str(response.url).rsplit('/', 1)[-1].replace('-', ' ')
         parser = html.fromstring(response.text)
         # Get results from the first page
         search_results = parser.xpath("//img[@class='base-img']")
         img_id = '0'
         for caption in search_results:
-            title = caption.xpath("./@alt")[0]
-            title_arr = title.split('|')
-            title = title_arr[0]
-            title = title[0:len(title)-1]
+            temp_title = caption.xpath("./@alt")[0]
+            title_arr = temp_title.split('|')
+            #title = title[0:len(title)-1]
             caption = title_arr[1]
             # Find what image id we are adding the captions to
             if img_id == '0':
@@ -52,9 +56,7 @@ class CaptionSpider(scrapy.Spider):
         
         if next_page_url:
             page_number = next_page_url.split('=')[1]
-            self.log("About to request again")
-            self.log(page_number)
-            if float(page_number) < 1000.0:
+            if float(page_number) < 500.0:
                 yield scrapy.Request(next_page_url, callback=self.parse)
             else:
                 yield json_dict
